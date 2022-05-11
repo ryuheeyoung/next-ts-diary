@@ -1,4 +1,5 @@
 import CalendarForm from "components/calendar/calendar-form";
+import { useRouter } from "next/router";
 import { useMemo } from "react";
 import styled from "styled-components";
 import { getFirstDate, getLastDate, MONTH } from "utils/dates/month";
@@ -36,10 +37,13 @@ type MonthlyType = {
   [k: string]: number[];
 };
 
-const year = new Date().getFullYear(); // current years
 const month_list = Object.keys(MONTH); // all month list
 
 const Calendar = () => {
+  const {
+    query: { year },
+  } = useRouter();
+
   /**
    * 해당연월별 날짜배열 구하기
    * @returns 날짜배열
@@ -47,8 +51,8 @@ const Calendar = () => {
   const getMonthly = (): MonthlyType => {
     let mth: MonthlyType = Object.fromEntries(month_list.map((m) => [m, []]));
     month_list.forEach((m) => {
-      const firstDate = getFirstDate(year, MONTH[m]);
-      const lastDate = getLastDate(year, MONTH[m]);
+      const firstDate = getFirstDate(year as string, MONTH[m]);
+      const lastDate = getLastDate(year as string, MONTH[m]);
 
       const emptyCnt = firstDate.getDay();
       let tmpMonth: number[] = [];
@@ -64,14 +68,14 @@ const Calendar = () => {
     return mth;
   };
 
-  const monthly: { [k: string]: number[] } = useMemo(getMonthly, []); // 연월별 날짜배열 변수
+  const monthly: { [k: string]: number[] } = useMemo(getMonthly, [year]); // 연월별 날짜배열 변수
 
   return (
     <CalendarLayout>
       <CalendarYear>{year}년</CalendarYear>
       <MonthlyLayout>
-        {month_list.map((m) => (
-          <CalendarForm m={m} dates={monthly[m]} />
+        {month_list.map((m, i) => (
+          <CalendarForm key={`${m}-${i}`} m={m} dates={monthly[m]} />
         ))}
       </MonthlyLayout>
     </CalendarLayout>
