@@ -48,7 +48,7 @@ const Calendar = () => {
    * 해당연월별 날짜배열 구하기
    * @returns 날짜배열
    */
-  const getMonthly = (): MonthlyType => {
+  const getMonthly = (year: string): MonthlyType => {
     let mth: MonthlyType = Object.fromEntries(month_list.map((m) => [m, []]));
     month_list.forEach((m) => {
       const firstDate = getFirstDate(year as string, MONTH[m]);
@@ -68,7 +68,10 @@ const Calendar = () => {
     return mth;
   };
 
-  const monthly: { [k: string]: number[] } = useMemo(getMonthly, [year]); // 연월별 날짜배열 변수
+  const monthly: { [k: string]: number[] } = useMemo(
+    () => getMonthly(year as string),
+    [year]
+  ); // 연월별 날짜배열 변수
 
   return (
     <CalendarLayout>

@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import styled from "styled-components";
 import { Holiday } from "utils/dates/holiday";
 import { MONTH } from "utils/dates/month";
@@ -6,7 +7,13 @@ import { getWeekLabel } from "utils/dates/weeks";
 /**
  * Monthly layout styled
  */
-const MonthlyLayout = styled.div``;
+const MonthlyLayout = styled.div`
+  padding: 5px 5px;
+  &:hover {
+    border-color: #e6e6e6;
+    box-shadow: 1px 1px 15px #ccc;
+  }
+`;
 /**
  * Month title styled
  */
@@ -62,19 +69,26 @@ type PropsType = {
 const wkTitle: string[] = getWeekLabel(0);
 
 const CalendarForm = ({ m, dates }: PropsType) => {
-  const addHoliday = (m: string, d: number) => {
-    let classes = !d ? "noHover" : "";
+  const router = useRouter();
+
+  const addHoliday = (month: string, date: number) => {
+    let classes = !date ? "noHover" : "";
     const holiday = Holiday.find(
       (h) =>
-        h.month === MONTH[m] + 1 &&
-        h.date === +d &&
+        h.month === MONTH[month] + 1 &&
+        h.date === +date &&
         +h.id.charAt(h.id.length - 1) === 1
     );
     return holiday ? `${classes} holiday` : classes;
   };
 
+  const monthlyHandler = (month: string) => {
+    const { year } = router.query;
+    router.push(`/${year}/${month}`);
+  };
+
   return (
-    <MonthlyLayout>
+    <MonthlyLayout onClick={() => monthlyHandler(m)}>
       <MonthTitle>{MONTH[m] + 1}월</MonthTitle>
       <WeekNameLayout className="title">
         {wkTitle.map((nm, i) => (

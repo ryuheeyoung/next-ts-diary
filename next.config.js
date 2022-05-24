@@ -5,7 +5,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://ryuheeyoung.github.io/next-ts-diary/' : ''
+  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://next-ts-diary.vercel.app' : ''
 }
 
 module.exports = nextConfig
