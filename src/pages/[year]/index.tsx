@@ -1,4 +1,4 @@
-import CalendarForm from "components/calendar/calendar-form";
+import CalendarForm from "components/calendar-form";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import styled from "styled-components";
