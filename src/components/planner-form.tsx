@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { getFirstDate, getLastDate, MONTH } from "utils/dates/month";
 import { getWeekLabel } from "utils/dates/weeks";
+import Drawer from "./drawer-form";
 
 /**
  * weeks name layout styled
@@ -25,10 +26,10 @@ const WeekNameLayout = styled.div`
     position: relative;
     &:nth-child(1),
     &:nth-child(7n + 1) {
-      color: red;
+      color: ${(props) => props.theme.color.red};
     }
     &:nth-child(7n) {
-      color: blue;
+      color: ${(props) => props.theme.color.blue};
     }
     &:hover {
       &:not(.noHover) {
@@ -43,9 +44,14 @@ const WeekNameLayout = styled.div`
 const PlanMonly = styled.div`
   min-height: 150px;
   overflow: overlay;
+  cursor: text;
+  &:hover {
+    background: #d9d9d96b;
+  }
   & span {
     padding: 0 7px;
     border-bottom: 1px solid #ccc;
+    cursor: pointer;
   }
   & div {
     display: inline-flex;
@@ -55,6 +61,7 @@ const PlanMonly = styled.div`
     color: black;
     line-height: 0;
     text-shadow: 0px 0px 5px orangered;
+    cursor: pointer;
   }
 `;
 
@@ -69,6 +76,7 @@ const PlannerForm = () => {
   const router = useRouter();
 
   const refs = useRef<HTMLElement[]>([]);
+  const [showDrawer, setShowDrawer] = useState(false);
 
   const year: string = useMemo(() => router!.query["year"], [router]) as string;
   const month: string = useMemo(
@@ -116,13 +124,16 @@ const PlannerForm = () => {
       const x = cX - pX - dX;
       const y = cY - pY - dY;
 
+      setShowDrawer(true);
+
       const PConId = target.id.replace("id", "Con");
-      const ref = refs.current.find((r) => r.id === PConId);
-      if (ref) {
-        ref.style.left = `${x}px`;
-        ref.style.top = `${y}px`;
-        ref.innerText = "hello";
-      }
+      const div = document.createElement("div");
+      div.style.left = `${x}px`;
+      div.style.top = `${y}px`;
+      div.id = `${PConId}-${new Date().getTime()}`;
+      div.innerText = "hello";
+
+      divTarget.appendChild(div);
     } else {
       const id = target.dataset.itemid;
       if (id === "planDate") {
@@ -132,7 +143,12 @@ const PlannerForm = () => {
     }
   };
 
-  const addToRefs = (ele) => refs.current.push(ele);
+  /**
+   *
+   * @param ele div element
+   * @returns refs
+   */
+  const addToRefs = (ele: HTMLDivElement) => refs.current.push(ele);
 
   return (
     <>
@@ -147,17 +163,15 @@ const PlannerForm = () => {
         {dates.map((d, i) => (
           <PlanMonly
             onClick={onClick}
+            ref={(e: HTMLDivElement) => addToRefs(e)}
             key={`P-${year}-${month}-${d}-${i}`}
             id={`Pid-${year}-${month}-${d}-${i}`}
           >
-            <div
-              ref={(e) => addToRefs(e)}
-              id={`PCon-${year}-${month}-${d}-${i}`}
-            ></div>
             <span data-itemid="planDate">{d ? d : ""}</span>
           </PlanMonly>
         ))}
       </WeekNameLayout>
+      <Drawer visible={showDrawer}></Drawer>
     </>
   );
 };
