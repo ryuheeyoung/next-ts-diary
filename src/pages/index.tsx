@@ -1,14 +1,21 @@
+import BookSelf from "components/book-form";
 import styled from "styled-components";
 
-const Title = styled.h1`
-  color: red;
-  font-size: 50px;
+const GridLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: visible;
+  border-bottom: 3px solid;
+  height: 165px;
 `;
 
 export default function Home() {
   return (
     <>
-      <Title>My page</Title>
+      <GridLayout>
+        <BookSelf />
+      </GridLayout>
     </>
   );
 }
