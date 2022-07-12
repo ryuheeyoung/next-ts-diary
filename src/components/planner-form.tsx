@@ -1,9 +1,9 @@
 import { useRouter } from "next/router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import styled from "styled-components";
+import { findHoliday } from "utils/dates/holiday";
 import { getFirstDate, getLastDate, MONTH } from "utils/dates/month";
 import { getWeekLabel } from "utils/dates/weeks";
-import Drawer from "./drawer-form";
 
 /**
  * weeks name layout styled
@@ -62,6 +62,14 @@ const PlanMonly = styled.div`
     line-height: 0;
     text-shadow: 0px 0px 5px orangered;
     cursor: pointer;
+    &:after {
+      content: "x";
+      position: absolute;
+      right: -10px;
+      top: 0;
+      bottom: 0;
+      cursor: pointer;
+    }
   }
 `;
 
@@ -76,13 +84,13 @@ const PlannerForm = () => {
   const router = useRouter();
 
   const refs = useRef<HTMLElement[]>([]);
-  const [showDrawer, setShowDrawer] = useState(false);
 
   const year: string = useMemo(() => router!.query["year"], [router]) as string;
   const month: string = useMemo(
     () => router!.query["month"],
     [router]
   ) as string;
+
   const getPlanMonth = (year: string, month: string) => {
     const firstDate = getFirstDate(year as string, MONTH[month]);
     const lastDate = getLastDate(year as string, MONTH[month]);
@@ -106,41 +114,54 @@ const PlannerForm = () => {
 
   const onClick = useCallback((e) => WritingHandler(e), []);
 
-  const WritingHandler = (e) => {
-    console.log((window["foo"] = e));
-    const target = e.target;
+  const WritingHandler = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
     const divTarget = e.currentTarget;
 
     if (target === divTarget) {
-      const cX = e.clientX;
-      const cY = e.clientY;
+      if (!target.id.match("edit")) {
+        const cX = e.clientX;
+        const cY = e.clientY;
 
-      const pX = divTarget.parentElement.offsetLeft;
-      const pY = divTarget.parentElement.offsetTop;
+        const pX = divTarget.parentElement!.offsetLeft;
+        const pY = divTarget.parentElement!.offsetTop;
 
-      const dX = divTarget.offsetLeft;
-      const dY = divTarget.offsetTop;
+        const dX = divTarget.offsetLeft;
+        const dY = divTarget.offsetTop;
 
-      const x = cX - pX - dX;
-      const y = cY - pY - dY;
+        const x = cX - pX - dX;
+        const y = cY - pY - dY;
 
-      setShowDrawer(true);
+        const w = divTarget.offsetWidth;
 
-      const PConId = target.id.replace("id", "Con");
-      const div = document.createElement("div");
-      div.style.left = `${x}px`;
-      div.style.top = `${y}px`;
-      div.id = `${PConId}-${new Date().getTime()}`;
-      div.innerText = "hello";
+        const PConId = target.id.replace("id", "Con");
+        const div = document.createElement("div");
+        div.style.left = `${x - 10}px`;
+        div.style.top = `${y - 20}px`;
+        div.style.width = `${w - x}px`;
+        div.style.background = "red";
+        div.style.height = `22px`;
+        div.style.lineHeight = "1em";
+        div.style.zIndex = "999";
+        div.classList.add("editor");
+        div.style.userSelect = "none";
+        div.id = `edit-${PConId}-${new Date().getTime()}`;
+        div.contentEditable = "true";
 
-      divTarget.appendChild(div);
+        divTarget.appendChild(div);
+        div.focus();
+      }
     } else {
       const id = target.dataset.itemid;
       if (id === "planDate") {
         return;
       }
-      console.log(target);
     }
+  };
+
+  const addHoliday = (date: number) => {
+    const holiday = findHoliday(month, date);
+    return holiday ? "holiday" : "";
   };
 
   /**
@@ -162,16 +183,16 @@ const PlannerForm = () => {
       <WeekNameLayout>
         {dates.map((d, i) => (
           <PlanMonly
-            onClick={onClick}
+            onClick={d ? onClick : undefined}
             ref={(e: HTMLDivElement) => addToRefs(e)}
             key={`P-${year}-${month}-${d}-${i}`}
             id={`Pid-${year}-${month}-${d}-${i}`}
+            className={addHoliday(d)}
           >
             <span data-itemid="planDate">{d ? d : ""}</span>
           </PlanMonly>
         ))}
       </WeekNameLayout>
-      <Drawer visible={showDrawer}></Drawer>
     </>
   );
 };

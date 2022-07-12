@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import WritingForm from "./writing-form";
 
 interface divType {
   visible?: boolean;
@@ -19,7 +20,11 @@ type PropsType = {
 };
 
 const Drawer = ({ visible }: PropsType) => {
-  return <DrawerLayout visible={visible}></DrawerLayout>;
+  return (
+    <DrawerLayout visible={visible}>
+      <WritingForm type="auto"></WritingForm>
+    </DrawerLayout>
+  );
 };
 
 export default Drawer;

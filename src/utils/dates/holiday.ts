@@ -1,3 +1,5 @@
+import { MONTH } from "./month";
+
 export interface Iholiday {
     id: string;
     nm: string;
@@ -13,7 +15,7 @@ export const Holiday: Array<Iholiday> = [
     {id: '105080', nm: '어버이날', month: 5, date: 8, desc: null},
     {id: '105150', nm: '스승의날', month: 5, date: 15, desc: null},
     {id: '105180', nm: '광주민주화운동', month: 5, date: 18, desc: null},
-    {id: '106060', nm: '현충일', month: 6, date: 6, desc: null},
+    {id: '106061', nm: '현충일', month: 6, date: 6, desc: null},
     {id: '106250', nm: '6.25전쟁', month: 6, date: 25, desc: null},
     {id: '107170', nm: '제헌절', month: 7, date: 17, desc: null},
     {id: '108151', nm: '광복절', month: 8, date: 15, desc: null},
@@ -21,3 +23,16 @@ export const Holiday: Array<Iholiday> = [
     {id: '110091', nm: '한글날', month: 10, date: 9, desc: null},
     {id: '112251', nm: '성탄절', month: 12, date: 25, desc: null},
 ];
+
+/**
+ * 공휴일찾기
+ * @param month MonthType key
+ * @param date 
+ * @returns Iholiday|undefind
+ */
+export const findHoliday = (month: string, date: number) => Holiday.find(
+    (h) =>
+      h.month === MONTH[month] + 1 &&
+      h.date === +date &&
+      +h.id.charAt(h.id.length - 1) === 1
+  );

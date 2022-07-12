@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import styled from "styled-components";
-import { Holiday } from "utils/dates/holiday";
+import { findHoliday, Holiday } from "utils/dates/holiday";
 import { MONTH } from "utils/dates/month";
 import { getWeekLabel } from "utils/dates/weeks";
 
@@ -73,12 +73,7 @@ const CalendarForm = ({ m, dates }: PropsType) => {
 
   const addHoliday = (month: string, date: number) => {
     let classes = !date ? "noHover" : "";
-    const holiday = Holiday.find(
-      (h) =>
-        h.month === MONTH[month] + 1 &&
-        h.date === +date &&
-        +h.id.charAt(h.id.length - 1) === 1
-    );
+    const holiday = findHoliday(month, date);
     return holiday ? `${classes} holiday` : classes;
   };
 

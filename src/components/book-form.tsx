@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
+import React, { Ref, useCallback, useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
 const PutAni = (x: number, y: number) => keyframes`
@@ -15,7 +15,12 @@ const PutAni = (x: number, y: number) => keyframes`
     height: 720px;
   }
 `;
-const BookLayout = styled.div<{ x?: number; y?: number }>`
+
+const BookLayout = styled.div<{
+  ref?: Ref<HTMLElement>;
+  x?: number;
+  y?: number;
+}>`
   height: 150px;
   width: 20px;
   overflow: hidden;
@@ -24,6 +29,8 @@ const BookLayout = styled.div<{ x?: number; y?: number }>`
   text-align: center;
   background: #71efb0;
   transition: 0.5s;
+  border-radius: 2px;
+  cursor: grab;
   & > div {
     transition: none;
     background: ${(props) => props.theme.color.white};
@@ -66,15 +73,14 @@ const BookLayout = styled.div<{ x?: number; y?: number }>`
       line-height: 2;
       text-underline-offset: 2px;
       text-decoration-line: underline;
-    }
   }
 `;
 
 const BookSelf = () => {
   const router = useRouter();
+  const ref = useRef<HTMLElement>(null);
 
   const [show, setShow] = useState<HTMLDivElement>();
-
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       let ele = e.target as HTMLDivElement;
@@ -87,34 +93,47 @@ const BookSelf = () => {
   );
 
   const onMove = useCallback(() => {
-    console.log(show!.id);
     router.push(show!.id);
   }, [show]);
 
+  useEffect(() => {
+    const clicked = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (ref.current && !ref.current.contains(target)) {
+        setShow(undefined);
+      }
+    };
+
+    window.addEventListener("click", clicked, true);
+
+    return () => {
+      window.removeEventListener("click", clicked, true);
+    };
+  }, []);
+
   return (
     <>
-      {["1990", "1991", "1992", "1993", "1994", "2020", "2021", "2022"].map(
-        (y) => (
-          <BookLayout
-            key={y}
-            id={y}
-            className={show?.id === y ? "put" : ""}
-            onClick={onClick}
-          >
-            <div>{y} Diary</div>
-          </BookLayout>
-        )
-      )}
+      {["2020", "2021", "2022"].map((y) => (
+        <BookLayout
+          key={y}
+          id={y}
+          className={show?.id === y ? "put" : ""}
+          onClick={onClick}
+        >
+          <div>{y} Diary</div>
+        </BookLayout>
+      ))}
       {show && (
         <>
           <BookLayout
+            ref={ref as any}
             key={`show-${show.id}`}
             className={"show"}
             x={show.offsetLeft}
             y={show.offsetHeight}
             onClick={onMove}
           >
-            <div aria-readonly>{show.id} Diary</div>
+            <div>{show.id} Diary</div>
           </BookLayout>
         </>
       )}
